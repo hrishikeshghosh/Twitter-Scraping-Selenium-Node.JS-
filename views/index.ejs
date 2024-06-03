@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scraper</title>
+</head>
+
+<body>
+  <button onclick="get_scraps()" style="font-size: 1.2rem; cursor: pointer;">Click here to run the script</button>
+  <div id="text_container"></div>
+  <button id="last_btn" onclick="fetch_trendings()" style="font-size: 1.2rem; cursor: pointer; display: none;">Click here to run query again</button>
+</body>
+
+<script>
+  async function get_scraps() {
+
+    await fetch('http://localhost:5000/trends/get-trendings', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
+      .then((response) => response.json())
+      .then((data) => {
+        const result = data.data
+        const text_container = document.getElementById("text_container")
+        const last_btn = document.getElementById('last_btn')
+
+        const timestamp_p = document.createElement('p');
+        timestamp_p.innerHTML = `These are the most happening topics as on <span style="font-weight:700;">${result.timeStamp}</span>`;
+        text_container.appendChild(timestamp_p)
+
+        for (let i = 0; i < result.trending.length; i++) {
+          const trend = document.createElement('p');
+          trend.textContent = `- ${result.trending[i]}`
+          trend.style.fontWeight = 700;
+          text_container.appendChild(trend)
+        }
+        const ip_pp = document.createElement('p')
+        ip_pp.innerHTML = `The IP address used for this query was <span style="font-weight:700;">${result.ip_address}</span>`
+        text_container.appendChild(ip_pp)
+
+        const mongoText = document.createElement('p')
+        mongoText.innerHTML = `Here’s a JSON extract of this record from the MongoDB: `
+        text_container.appendChild(mongoText)
+        const mongo_data = document.createElement('pre')
+        mongo_data.innerHTML = JSON.stringify(result.mongoSnap, null, 2)
+        text_container.appendChild(mongo_data)
+
+        last_btn.style.display = "block"
+      })
+      .catch((err) => console.log(err))
+
+
+  }
+</script>
+
+</html>
